@@ -8,9 +8,12 @@ Created on Sat Feb 21 13:54:56 2026
 import pandas as pd
 import numpy as np
 import statsmodels.api as sm
+import matplotlib.pyplot as plt
 
-df = pd.read_csv(r"learning_traces.13m.csv",
-                 )
+df = pd.read_csv(
+    r"C:\Users\janas\Downloads\settles.acl16.learning_traces.13m.csv.gz",
+    compression="gzip"
+)
 
 EPS = 1e-6
 
@@ -22,7 +25,7 @@ df["log_p"]  = np.log(df["p_recall"])
 df["log_d"]  = np.log(df["delta"])
 df["log_hs"] = np.log(df["history_seen"])
 
-MIN_N = 200
+MIN_N = 3000
 rows = []
 
 for uid, g in df.groupby("user_id"):
@@ -62,3 +65,23 @@ betas_df.to_csv(
     sep=";",
     index=False
 )
+
+
+# Are β’s unstable?
+print(betas_df[["beta0","beta1","beta2"]].describe())
+
+# check variance vs n
+plt.scatter(betas_df["n"], betas_df["beta1"])
+plt.xlabel("n observations")
+plt.ylabel("beta1")
+plt.show()
+
+# Are effects statistically weak?
+print((betas_df["pval_log_d"] < 0.05).mean())
+print((betas_df["pval_log_hs"] < 0.05).mean())
+
+# Is R² systematically tiny?
+print(betas_df["r2"].describe())
+
+plt.hist(betas_df["r2"], bins=50)
+plt.show()
