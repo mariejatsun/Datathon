@@ -78,7 +78,7 @@ def add_classification_columns(df, lexeme_col='lexeme_string'):
     # .map does C-level dict lookup across the whole column at once
     df['word_class']    = df['pos_raw'].map(POS_TO_CLASS).fillna('Other')
     df['vocab_grammar'] = df['word_class'].map(CLASS_TO_VOCABGRAMMAR).fillna('Other')
-
+    df = df[df.groupby("user_id")["user_id"].transform("count") >= 3000]
     return df
 
 
