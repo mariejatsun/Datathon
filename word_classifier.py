@@ -67,10 +67,13 @@ def add_classification_columns(df, lexeme_col='lexeme_string'):
     df = df.copy()
 
     # Extract POS: pull content inside [...], take first tag before '.'
-    df['pos_raw'] = (df[lexeme_col]
-                     .str.extract(r'\[([^\]]+)\]')[0]
-                     .str.split('.').str[0]
-                     .fillna('unknown'))
+    df["pos_raw"] = (
+            df["lexeme_string"]
+              .str.extract(r"<([^>]+)>")[0]
+              .fillna("unknown")
+        )
+        
+    df["pos_raw"].value_counts().head(20)
 
     # .map does C-level dict lookup across the whole column at once
     df['word_class']    = df['pos_raw'].map(POS_TO_CLASS).fillna('Other')
@@ -203,7 +206,11 @@ def normalise_profiles(profile_df, feature_cols=None):
 t0 = time.time()
 
 print("Loading CSV...")
-df = pd.read_csv(r'C:\Users\Desmi\Desktop\Schoolwerk\learning_traces.13m.csv')
+df = pd.read_csv(
+    r"C:\Users\janas\Downloads\Spaced Repetition Data.gz",
+    compression="gzip",
+    low_memory=False
+)
 print(f"  Loaded {len(df):,} rows, {df['user_id'].nunique():,} unique users ({time.time()-t0:.1f}s)")
 
 print("Classifying lexemes...")
