@@ -179,28 +179,8 @@ def build_user_profiles(df, user_col='user_id', recall_col='p_recall'):
     profile_df['dominant_vg'] = profile_df['vocab_grammar_ratio'].apply(_dominant_vg_label)
 
     return profile_df
-
-
 # ---------------------------------------------------------------------------
-# 5.  NORMALISATION  (for clustering)
-# ---------------------------------------------------------------------------
-
-def normalise_profiles(profile_df, feature_cols=None):
-    from sklearn.preprocessing import MinMaxScaler
-
-    if feature_cols is None:
-        feature_cols = [c for c in profile_df.columns
-                        if c.startswith('pct_') or c.startswith('recall_')]
-
-    scaler = MinMaxScaler()
-    normed = profile_df[feature_cols].copy()
-    normed = normed.dropna(axis=1, how='all')
-    normed[normed.columns] = scaler.fit_transform(normed.fillna(0))
-    return normed
-
-
-# ---------------------------------------------------------------------------
-# 6.  RUN
+# 5.  RUN
 # ---------------------------------------------------------------------------
 
 t0 = time.time()
@@ -223,12 +203,6 @@ t2 = time.time()
 profiles = build_user_profiles(df)
 print(f"  Done — {len(profiles):,} user profiles ({time.time()-t2:.1f}s)")
 
-print("Normalising...")
-t3 = time.time()
-normed = normalise_profiles(profiles)
-print(f"  Done ({time.time()-t3:.1f}s)")
-
 print("Saving to CSV...")
 profiles.to_csv('user_profiles.csv')
-normed.to_csv('user_profiles_normalised.csv')
-print(f"  Saved. Total time: {time.time()-t0:.1f}s")
+

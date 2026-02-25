@@ -6,3 +6,8 @@ scikit-learn
 time
 PIL
 os
+argparse
+warnings
+pathlib
+scipy
+textwrap

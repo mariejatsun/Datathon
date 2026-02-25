@@ -15,7 +15,7 @@ Outputs:
 # ──────────────────────────────────────────
 #  SET YOUR DATA PATH HERE (FILE, not folder)
 # ──────────────────────────────────────────
-DATA_PATH   = r"C:\Users\thoma\OneDrive\Documenten\KUL\Master AI\Datathon\Spaced Repetition Data\Spaced Repetition Data"  # or .csv
+DATA_PATH   = r"learning_traces.13m.csv"  # or .csv
 SAMPLE_SIZE = None   # None = full dataset
 OUTPUT_DIR  = "."    # "." = current folder (waar je script runt)
 # ──────────────────────────────────────────
