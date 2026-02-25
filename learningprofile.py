@@ -9,6 +9,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 import pandas as pd
 import matplotlib.pyplot as plt
+from sklearn.metrics import silhouette_score, silhouette_samples
+import numpy as np
 
 betas_df = pd.read_csv("betas_df.csv", sep=";")
 betas_df = betas_df[
