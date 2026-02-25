@@ -15,7 +15,7 @@ Outputs:
 # ──────────────────────────────────────────
 #  SET YOUR DATA PATH HERE (FILE, not folder)
 # ──────────────────────────────────────────
-DATA_PATH   = r"C:\Users\janas\Downloads\Spaced Repetition Data.gz"   # or .csv
+DATA_PATH   = r"C:\Users\thoma\OneDrive\Documenten\KUL\Master AI\Datathon\Spaced Repetition Data\Spaced Repetition Data"  # or .csv
 SAMPLE_SIZE = None   # None = full dataset
 OUTPUT_DIR  = "."    # "." = current folder (waar je script runt)
 # ──────────────────────────────────────────
@@ -31,7 +31,7 @@ from scipy.stats import beta
 warnings.filterwarnings("ignore")
 
 RANDOM_STATE        = 42
-MIN_EVENTS_PER_USER = 3000
+MIN_EVENTS_PER_USER = 1500
 
 AGE_PEAK     = 18
 AGE_MAX      = 80
@@ -153,9 +153,6 @@ def compute_learning_age(user_feats: pd.DataFrame) -> pd.DataFrame:
         lo, hi = s.min(), s.max()
         return (s - lo) / (hi - lo + 1e-9)
 
-    def fixed_scale(s, worst, best):
-        return ((s - worst) / (best - worst)).clip(0, 1)
-
     components = pd.DataFrame(index=uf.index)
 
     components["vocab"]     = minmax_data(uf["log_vocab_breadth"])
@@ -165,23 +162,30 @@ def compute_learning_age(user_feats: pd.DataFrame) -> pd.DataFrame:
 
     w = np.array([SCORE_WEIGHTS[k] for k in components.columns])
     score = components.values @ w
-    
-    # --- STRETCH SCORE ---
+
+    # --- STRETCH SCORE to [0, 1] ---
     s_min, s_max = np.percentile(score, 5), np.percentile(score, 95)
     s_stretched = np.clip((score - s_min) / (s_max - s_min + 1e-9), 0, 1)
-    
-    span = AGE_MAX - AGE_PEAK
-    u = 1 - s_stretched   # 0=jong, 1=oud
-    
-    a, b = 3.5, 2.0       # TUNE DEZE
-    u_skew = beta.cdf(u, a, b)
-    
-    age = AGE_PEAK + span * u_skew
-    
+
+    # --- EXPONENTIAL DECAY MAPPING ---
+    # High score (good learner) -> young age (20)
+    # Low score (poor learner)  -> old age (60)
+    # u = 0 means best learner (age=20), u = 1 means worst (age=60)
+    u = 1.0 - s_stretched
+
+    # Exponential: age = 20 + 40 * (e^(k*u) - 1) / (e^k - 1)
+    # k controls steepness — higher k = more exponential
+    #k = 3.0
+    #age = AGE_PEAK + (60 - AGE_PEAK) * (np.exp(k * u) - 1) / (np.exp(k) - 1)
+
+    k = 5.0
+    age = AGE_PEAK + (50 - AGE_PEAK) * (np.exp(k * u) - 1) / (np.exp(k) - 1)
+
+
     uf["composite_score"] = np.round(s_stretched, 4)
     uf["learning_age"]    = np.round(age).astype(int)
 
-    # bootstrap CI (keep, but light)
+    # bootstrap CI
     rng = np.random.default_rng(RANDOM_STATE)
     B = 200
     boots = np.zeros((len(uf), B))
@@ -189,10 +193,8 @@ def compute_learning_age(user_feats: pd.DataFrame) -> pd.DataFrame:
         noise = rng.normal(0, 0.05, size=components.shape)
         boots[:, i] = score_to_age((components.values + noise).clip(0, 1) @ w)
 
-    uf["composite_score"] = np.round(score, 4)
-    uf["learning_age"]    = np.round(age).astype(int)
-    uf["learning_age_lo"] = np.round(np.percentile(boots, 5, axis=1)).astype(int)
-    uf["learning_age_hi"] = np.round(np.percentile(boots,95, axis=1)).astype(int)
+    uf["learning_age_lo"] = np.round(np.percentile(boots, 5,  axis=1)).astype(int)
+    uf["learning_age_hi"] = np.round(np.percentile(boots, 95, axis=1)).astype(int)
 
     def bracket(a):
         for lo, hi, lbl in AGE_BRACKETS:
@@ -202,6 +204,9 @@ def compute_learning_age(user_feats: pd.DataFrame) -> pd.DataFrame:
 
     uf["age_bracket"] = uf["learning_age"].apply(bracket)
     return uf
+
+
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -242,3 +247,6 @@ plt.xlabel("Learning Age")
 plt.ylabel("Number of Users")
 plt.title("Distribution of Learning Age")
 plt.show()
+
+
+
