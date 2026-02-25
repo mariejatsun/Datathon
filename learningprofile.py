@@ -78,3 +78,32 @@ plt.ylabel("Cluster")
 plt.title("Silhouette plot for clusters")
 plt.tight_layout()
 plt.show()
+
+
+
+
+# -------------------------
+# Cluster mapping (labels 1,2,3 + naam)
+# -------------------------
+
+cluster_name_map = {
+    0: "REPETITION_BUILDER",
+    1: "STEADY_RETAINER",
+    2: "FAST_BURNER"
+}
+
+output_df = betas_df[["user_id", "cluster"]].copy()
+
+# maak cluster 1-2-3 i.p.v. 0-1-2
+output_df["cluster_id"] = output_df["cluster"] + 1
+
+# voeg naam toe
+output_df["profile"] = output_df["cluster"].map(cluster_name_map)
+
+# kolommen netjes ordenen
+output_df = output_df[["user_id", "cluster_id", "profile"]]
+
+# save
+output_df.to_csv("user_cluster_profiles.csv", index=False)
+
+print("CSV saved: user_cluster_profiles.csv")

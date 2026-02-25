@@ -60,6 +60,11 @@ betas_df = pd.DataFrame(rows)
 betas_df["beta_list"] = betas_df[["beta0","beta1","beta2"]].values.tolist()
 print(betas_df.head())
 
+# Percentiles 
+betas_df["pct_b0"] = betas_df["beta0"].rank(pct=True)*100
+betas_df["pct_b1"] = betas_df["beta1"].rank(pct=True)*100
+betas_df["pct_b2"] = betas_df["beta2"].rank(pct=True)*100
+
 betas_df.to_csv(
     r"betas_df_eval.csv",
     sep=";",
