@@ -8,7 +8,7 @@ The pipeline consists of four analytical components and one visualization module
 
 #### 1. Learning Profile (Memory Parameters)
 *Betas.py*
-- Estimates per-user memory model parameters using linear regression:
+- Estimates per-user memory model parameters using linear regression (log(precall​)=β0​+β1​log(δ)+β2​log(history_seen), formula based on:https://github.com/duolingo/halflife-regression/blob/master/settles.acl16.pdf):
     - β0 → baseline recall
     - β1 → forgetting rate (time decay)
     - β2 → learning effect (practice effect)
