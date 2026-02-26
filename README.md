@@ -33,7 +33,7 @@ The pipeline consists of four analytical components and one visualization module
 
 #### 3. Learning Age
 *learning_age.py *
-- Computes a composite performance score and maps it to a Learning Age (18–80) using exponential scaling.
+- Computes a composite performance score and maps it to a Learning Age (18–50) using exponential scaling.
 - Includes bootstrap confidence intervals and age brackets
 - Output: *user_learning_age.csv*
 
@@ -55,3 +55,11 @@ The pipeline consists of four analytical components and one visualization module
 - Vocabulary vs Grammar preference
 - Learning Age
 - Animated Wrapped-style summary GIF
+
+
+### Some results of data modelling
+<img width="1779" height="608" alt="image" src="https://github.com/user-attachments/assets/e5acded8-8fb2-4ac4-9e7b-a5b882e6b22d" />
+<img width="1464" height="500" alt="image" src="https://github.com/user-attachments/assets/44c692cc-a152-4f95-94f5-1e8af0285b95" />
+<img width="920" height="500" alt="image" src="https://github.com/user-attachments/assets/5ad09cdc-1718-4223-bb70-9776576032ab" />
+
+
