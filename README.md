@@ -1,21 +1,57 @@
 # Datathon
-### Project Overview
-This project aims to identify 3 profiles for each Duolingo user, and presents them in a Duolingo Wrapped styled manner
-
 ### Data used
 Data used is the Spaced Repetition dataset from Duolingo. To run the code, the csv file should be included in the folder. The data is not included in the repository, but is available at: https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/N8XJME
 
-### Repository contents
-- Learning profile/
-    - betas.py extracts parameters and outputs betas_df_eval.csv
-    - learningprofile1.py uses these parameters to cluster into 3 distinct profiles, outputs user_cluster_profiles
+### Project Overview
+This repository builds a personalized Duolingo Wrapped-style profile using spaced repetition data.
+The pipeline consists of four analytical components and one visualization module.
 
-- Cognitive focus/
-    - word_classifier.py classifies lexemes and give vocab/grammar preference for each user, outputs user_profiles.csv
+#### Learning Profile (Memory Parameters)
+*Betas.py*
+- Estimates per-user memory model parameters using linear regression:
+    - β0 → baseline recall
+    - β1 → forgetting rate (time decay)
+    - β2 → learning effect (practice effect)
+- output: betas_df_eval.csv (Contains betas, percentiles, R², p-values, and model diagnostics per user)
 
-- Learning age/
-    - learning_age.py computes learning age and outputs user_learning_age.csv
+*learningprofile1.py*
+- Clusters users (KMeans, k=3) based on β parameters.
+- Profiles
+   - Repetition Builder
+   - steady retainer
+   - fast burner
+- Includes silhouette validation.
+- Output: *user_cluster_profiles.csv*
 
-- Wrapped/
-    - figma.py builds dynamic interface for presenting profiles in Wrapped styled manner
-    - app_slides and app_slides_update contain backbone of interface design
+#### Cognitive Focus (Vocabulary vs Grammar)
+*word_classifier.py*
+- Classifies lexemes into:
+    - Word class (Verb, Noun, etc.)
+    - Vocabulary vs Grammar
+- Aggregates per-user statistics and determines dominant focus.
+- Output: *user_profiles.csv*
+
+#### Learning Age
+*learning_age.py *
+- Computes a composite performance score and maps it to a Learning Age (18–80) using exponential scaling.
+- Includes bootstrap confidence intervals and age brackets
+- Output: *user_learning_age.csv*
+
+#### Wrapped Interface (Visualization)
+*figma.py*
+- Generates a 5-slide personalized Wrapped experience:
+    1. Intro
+    2. Memory percentiles (based on percentiles beta1 and beta2)
+    3. Vocabulary/Grammar focus
+    4. Learning Age
+    5. Cognitive cluster type
+- Inputs: *betas_df_eval.csv, user_profiles.csv, user_learning_age.csv, user_cluster_profiles.csv*
+- Output:*app_slides_update/slides.gif*
+  
+
+### Each user receives:
+- Memory performance percentiles
+- Cognitive learning type
+- Vocabulary vs Grammar preference
+- Learning Age
+- Animated Wrapped-style summary GIF
